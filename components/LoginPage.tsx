@@ -5,6 +5,24 @@ interface LoginPageProps {
     onLoginSuccess: () => void;
 }
 
+// Keep inputClasses at module scope so it's not re-created each render
+const inputClasses = "appearance-none bg-white bg-opacity-70 border border-purple-200 rounded-lg w-full py-3 px-4 text-text-main leading-tight focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition placeholder-text-light";
+
+type FormFieldProps = { label: string; type: string; value: string; setValue: (val: string) => void; placeholder?: string };
+const FormField: React.FC<FormFieldProps> = ({ label, type, value, setValue, placeholder }) => (
+    <div>
+        <label className="block text-primary text-sm font-bold mb-2">{label}</label>
+        <input
+            type={type}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            className={inputClasses}
+            placeholder={placeholder}
+            required
+        />
+    </div>
+);
+
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     const [isLoginView, setIsLoginView] = useState(true);
     const [email, setEmail] = useState('');
@@ -46,21 +64,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             }
         }, 1000);
     };
-
-    const inputClasses = "appearance-none bg-white bg-opacity-70 border border-purple-200 rounded-lg w-full py-3 px-4 text-text-main leading-tight focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition placeholder-text-light";
-    const FormField: React.FC<{ label: string; type: string; value: string; setValue: (val: string) => void; placeholder?: string }> = ({ label, type, value, setValue, placeholder }) => (
-        <div>
-            <label className="block text-primary text-sm font-bold mb-2">{label}</label>
-            <input 
-                type={type}
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                className={inputClasses}
-                placeholder={placeholder}
-                required
-            />
-        </div>
-    );
 
     return (
         <div className="min-h-screen w-full relative flex flex-col justify-center items-center p-4">
