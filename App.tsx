@@ -8,12 +8,13 @@ import EquipmentPage from './components/EquipmentPage';
 import UsersPage from './components/UsersPage';
 import BookingPage from './components/BookingPage';
 import LoginPage from './components/LoginPage';
+import StudentsPage from './components/StudentsPage';
 
 // FIX: Corrected import paths with './'
 import { mockUsers, mockEvents, mockEquipment, mockBookings, mockCheckIns } from './data/mockData';
 import { User, Event, Equipment, Booking, CheckIn, FullEvent, FullUser, UserRole, FullEquipment } from './types';
 
-type Page = 'dashboard' | 'events' | 'equipment' | 'users' | 'bookings';
+type Page = 'dashboard' | 'events' | 'equipment' | 'users' | 'bookings' | 'students';
 
 const App: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -104,6 +105,8 @@ const App: React.FC = () => {
                 return <EquipmentPage equipment={fullEquipmentData} bookings={bookings} setEquipment={setEquipment} setBookings={setBookings} />;
             case 'users':
                 return <UsersPage users={fullUsers} />;
+            case 'students':
+                return <StudentsPage users={users} events={events} checkIns={checkIns} />;
             case 'bookings':
                 return <BookingPage events={events} equipment={equipment} users={users} bookings={bookings} setBookings={setBookings} setEquipment={setEquipment} />;
             default:

@@ -13,27 +13,33 @@ interface EventDetailProps {
 
 const EventDetail: React.FC<EventDetailProps> = ({ event, onBack, users, setCheckIns }) => {
     const [rollNumber, setRollNumber] = useState('');
+    const [nameSearch, setNameSearch] = useState('');
+    const [searchResults, setSearchResults] = useState<User[]>([]);
+    const [showDropdown, setShowDropdown] = useState(false);
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null);
 
-    const handleAttendanceSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setFeedback(null);
-
-        if (!/^\d{9}$/.test(rollNumber)) {
-            setFeedback({ type: 'error', message: 'Please enter a valid 9-digit roll number.' });
-            return;
+    const handleNameSearch = (value: string) => {
+        setNameSearch(value);
+        if (value.trim().length >= 2) {
+            const filtered = users.filter(u => 
+                u.name.toLowerCase().includes(value.toLowerCase()) ||
+                u.roll_number.includes(value)
+            ).slice(0, 10); // Limit to 10 results
+            setSearchResults(filtered);
+            setShowDropdown(filtered.length > 0);
+        } else {
+            setSearchResults([]);
+            setShowDropdown(false);
         }
+    };
 
-        const user = users.find(u => u.roll_number === rollNumber);
-        if (!user) {
-            setFeedback({ type: 'error', message: `No user found with roll number ${rollNumber}.` });
-            return;
-        }
-
+    const markAttendance = (user: User) => {
         const isAlreadyCheckedIn = event.attendees.some(attendee => attendee.user_id === user.user_id);
         if (isAlreadyCheckedIn) {
             setFeedback({ type: 'info', message: `${user.name} is already marked as present.` });
+            setNameSearch('');
             setRollNumber('');
+            setShowDropdown(false);
             return;
         }
 
@@ -48,9 +54,42 @@ const EventDetail: React.FC<EventDetailProps> = ({ event, onBack, users, setChec
 
         setCheckIns(prev => [...prev, newCheckIn]);
         setFeedback({ type: 'success', message: `Successfully marked ${user.name} as present.` });
+        setNameSearch('');
         setRollNumber('');
+        setShowDropdown(false);
 
         setTimeout(() => setFeedback(null), 4000);
+    };
+
+    const handleAttendanceSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setFeedback(null);
+
+        if (rollNumber.trim()) {
+            if (!/^\d{9}$/.test(rollNumber)) {
+                setFeedback({ type: 'error', message: 'Please enter a valid 9-digit roll number.' });
+                return;
+            }
+
+            const user = users.find(u => u.roll_number === rollNumber);
+            if (!user) {
+                setFeedback({ type: 'error', message: `No user found with roll number ${rollNumber}.` });
+                return;
+            }
+
+            markAttendance(user);
+        } else if (nameSearch.trim()) {
+            const exactMatch = users.find(u => 
+                u.name.toLowerCase() === nameSearch.toLowerCase()
+            );
+            if (exactMatch) {
+                markAttendance(exactMatch);
+            } else {
+                setFeedback({ type: 'error', message: 'Please select a student from the dropdown or enter their roll number.' });
+            }
+        } else {
+            setFeedback({ type: 'error', message: 'Please enter a student name or roll number.' });
+        }
     };
 
     const TableContainer: React.FC<{ children: React.ReactNode; title: string }> = ({ children, title }) => (
@@ -86,22 +125,55 @@ const EventDetail: React.FC<EventDetailProps> = ({ event, onBack, users, setChec
                 <TableContainer title="Attendance">
                     <div className="mb-6 pb-6 border-b border-gray-200">
                         <h3 className="text-lg font-semibold text-text-main mb-3">Mark Attendance</h3>
-                        <form onSubmit={handleAttendanceSubmit} className="flex flex-col sm:flex-row gap-4 items-start">
-                            <div className="w-full">
-                                <label htmlFor="rollNumber" className="sr-only">Enter 9-digit Roll Number</label>
-                                <input
-                                    id="rollNumber"
-                                    type="text"
-                                    value={rollNumber}
-                                    onChange={(e) => setRollNumber(e.target.value.replace(/\D/g, ''))}
-                                    maxLength={9}
-                                    placeholder="Enter 9-digit Roll Number"
-                                    className="appearance-none border border-gray-200 rounded-lg w-full py-3 px-4 text-text-main leading-tight focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition"
-                                />
+                        <form onSubmit={handleAttendanceSubmit} className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="relative">
+                                    <label htmlFor="nameSearch" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Search by Name
+                                    </label>
+                                    <input
+                                        id="nameSearch"
+                                        type="text"
+                                        value={nameSearch}
+                                        onChange={(e) => handleNameSearch(e.target.value)}
+                                        onFocus={() => nameSearch.length >= 2 && setShowDropdown(searchResults.length > 0)}
+                                        placeholder="Type student name..."
+                                        className="appearance-none border border-gray-200 rounded-lg w-full py-3 px-4 text-text-main leading-tight focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition"
+                                    />
+                                    {showDropdown && (
+                                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                            {searchResults.map(user => (
+                                                <button
+                                                    key={user.user_id}
+                                                    type="button"
+                                                    onClick={() => markAttendance(user)}
+                                                    className="w-full text-left px-4 py-2 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
+                                                >
+                                                    <div className="font-medium text-text-main">{user.name}</div>
+                                                    <div className="text-sm text-gray-500">{user.roll_number} • {user.email}</div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <label htmlFor="rollNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Or Enter Roll Number
+                                    </label>
+                                    <input
+                                        id="rollNumber"
+                                        type="text"
+                                        value={rollNumber}
+                                        onChange={(e) => setRollNumber(e.target.value.replace(/\D/g, ''))}
+                                        maxLength={9}
+                                        placeholder="9-digit roll number"
+                                        className="appearance-none border border-gray-200 rounded-lg w-full py-3 px-4 text-text-main leading-tight focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition"
+                                    />
+                                </div>
                             </div>
                             <button
                                 type="submit"
-                                className="bg-primary hover:bg-primary-focus text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 whitespace-nowrap"
+                                className="bg-primary hover:bg-primary-focus text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 w-full md:w-auto"
                             >
                                 Mark Present
                             </button>

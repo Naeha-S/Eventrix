@@ -1,7 +1,7 @@
 import React from 'react';
 import { CalendarIcon, CogIcon, UsersIcon, HomeIcon, PlusCircleIcon, LogoIcon, LogoutIcon } from './icons/Icons';
 
-type Page = 'dashboard' | 'events' | 'equipment' | 'users' | 'bookings';
+type Page = 'dashboard' | 'events' | 'equipment' | 'users' | 'bookings' | 'students';
 
 interface SidebarProps {
     currentPage: Page;
@@ -15,6 +15,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage, onLogout
         { id: 'events', label: 'Events', icon: <CalendarIcon /> },
         { id: 'equipment', label: 'Equipment', icon: <CogIcon /> },
         { id: 'users', label: 'Users', icon: <UsersIcon /> },
+        { id: 'students', label: 'Students', icon: <UsersIcon /> },
         { id: 'bookings', label: 'Book Equipment', icon: <PlusCircleIcon /> },
     ];
 
