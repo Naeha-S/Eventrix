@@ -163,15 +163,63 @@ function loadStudentsData() {
         );
       });
       
-      // Add sample bookings
+      // Add sample bookings - each event gets relevant equipment
       const bookings = [
+        // Event 1: Tech Symposium - needs AV equipment
         { equipment_id: 1, event_id: 1, assigned_to: 241001001, booking_date: '2024-11-10', return_date: '2024-11-16', status: 'Active' },
         { equipment_id: 3, event_id: 1, assigned_to: 241001001, booking_date: '2024-11-10', return_date: '2024-11-16', status: 'Active' },
+        { equipment_id: 4, event_id: 1, assigned_to: 241001001, booking_date: '2024-11-10', return_date: '2024-11-16', status: 'Active' },
+        
+        // Event 2: Hackathon - needs tech equipment
         { equipment_id: 2, event_id: 2, assigned_to: 241001142, booking_date: '2024-11-15', return_date: '2024-11-21', status: 'Active' },
         { equipment_id: 6, event_id: 2, assigned_to: 241001142, booking_date: '2024-11-15', return_date: '2024-11-21', status: 'Active' },
-        { equipment_id: 5, event_id: 7, assigned_to: 241001075, booking_date: '2024-11-12', return_date: '2024-11-19', status: 'Active' },
+        { equipment_id: 7, event_id: 2, assigned_to: 241001142, booking_date: '2024-11-15', return_date: '2024-11-21', status: 'Active' },
+        
+        // Event 3: Cultural Fest - needs sound & furniture
+        { equipment_id: 3, event_id: 3, assigned_to: 241001050, booking_date: '2024-12-05', return_date: '2024-12-11', status: 'Pending' },
         { equipment_id: 8, event_id: 3, assigned_to: 241001050, booking_date: '2024-12-05', return_date: '2024-12-11', status: 'Pending' },
-        { equipment_id: 9, event_id: 3, assigned_to: 241001050, booking_date: '2024-12-05', return_date: '2024-12-11', status: 'Pending' }
+        { equipment_id: 9, event_id: 3, assigned_to: 241001050, booking_date: '2024-12-05', return_date: '2024-12-11', status: 'Pending' },
+        { equipment_id: 4, event_id: 3, assigned_to: 241001050, booking_date: '2024-12-05', return_date: '2024-12-11', status: 'Pending' },
+        
+        // Event 4: Sports Day (completed)
+        { equipment_id: 5, event_id: 4, assigned_to: 241001100, booking_date: '2024-10-20', return_date: '2024-10-29', status: 'Completed' },
+        { equipment_id: 8, event_id: 4, assigned_to: 241001100, booking_date: '2024-10-20', return_date: '2024-10-29', status: 'Completed' },
+        
+        // Event 5: AI/ML Workshop - needs projector & laptop
+        { equipment_id: 1, event_id: 5, assigned_to: 241001001, booking_date: '2024-11-20', return_date: '2024-11-28', status: 'Active' },
+        { equipment_id: 6, event_id: 5, assigned_to: 241001001, booking_date: '2024-11-20', return_date: '2024-11-28', status: 'Active' },
+        { equipment_id: 7, event_id: 5, assigned_to: 241001001, booking_date: '2024-11-20', return_date: '2024-11-28', status: 'Active' },
+        
+        // Event 6: Web Dev Bootcamp - needs tech equipment
+        { equipment_id: 2, event_id: 6, assigned_to: 241001020, booking_date: '2024-11-25', return_date: '2024-12-02', status: 'Pending' },
+        { equipment_id: 6, event_id: 6, assigned_to: 241001020, booking_date: '2024-11-25', return_date: '2024-12-02', status: 'Pending' },
+        
+        // Event 7: Robotics Exhibition - needs display equipment
+        { equipment_id: 5, event_id: 7, assigned_to: 241001075, booking_date: '2024-11-12', return_date: '2024-11-19', status: 'Active' },
+        { equipment_id: 10, event_id: 7, assigned_to: 241001075, booking_date: '2024-11-12', return_date: '2024-11-19', status: 'Active' },
+        { equipment_id: 9, event_id: 7, assigned_to: 241001075, booking_date: '2024-11-12', return_date: '2024-11-19', status: 'Active' },
+        
+        // Event 8: Placement Drive (completed)
+        { equipment_id: 1, event_id: 8, assigned_to: 241001001, booking_date: '2024-10-10', return_date: '2024-10-16', status: 'Completed' },
+        { equipment_id: 8, event_id: 8, assigned_to: 241001001, booking_date: '2024-10-10', return_date: '2024-10-16', status: 'Completed' },
+        
+        // Event 9: Photography Contest - needs camera
+        { equipment_id: 5, event_id: 9, assigned_to: 241001150, booking_date: '2024-11-15', return_date: '2024-11-23', status: 'Active' },
+        
+        // Event 10: Guest Lecture - needs AV equipment
+        { equipment_id: 1, event_id: 10, assigned_to: 241001001, booking_date: '2024-11-08', return_date: '2024-11-13', status: 'Active' },
+        { equipment_id: 3, event_id: 10, assigned_to: 241001001, booking_date: '2024-11-08', return_date: '2024-11-13', status: 'Active' },
+        
+        // Event 11: Annual Day - needs full setup
+        { equipment_id: 2, event_id: 11, assigned_to: 241001142, booking_date: '2024-12-15', return_date: '2024-12-21', status: 'Pending' },
+        { equipment_id: 3, event_id: 11, assigned_to: 241001142, booking_date: '2024-12-15', return_date: '2024-12-21', status: 'Pending' },
+        { equipment_id: 4, event_id: 11, assigned_to: 241001142, booking_date: '2024-12-15', return_date: '2024-12-21', status: 'Pending' },
+        { equipment_id: 8, event_id: 11, assigned_to: 241001142, booking_date: '2024-12-15', return_date: '2024-12-21', status: 'Pending' },
+        { equipment_id: 9, event_id: 11, assigned_to: 241001142, booking_date: '2024-12-15', return_date: '2024-12-21', status: 'Pending' },
+        
+        // Event 12: Blood Donation Camp (completed)
+        { equipment_id: 8, event_id: 12, assigned_to: 241001200, booking_date: '2024-11-05', return_date: '2024-11-09', status: 'Completed' },
+        { equipment_id: 9, event_id: 12, assigned_to: 241001200, booking_date: '2024-11-05', return_date: '2024-11-09', status: 'Completed' }
       ];
       
       bookings.forEach(booking => {
@@ -201,7 +249,7 @@ function loadStudentsData() {
         );
       });
       
-      console.log('✅ Sample data loaded (12 events, 7 bookings, 9 check-ins)');
+      console.log('✅ Sample data loaded (12 events, 37 bookings, 9 check-ins)');
     });
 }
 

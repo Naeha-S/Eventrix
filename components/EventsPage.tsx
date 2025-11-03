@@ -14,10 +14,12 @@ interface EventsPageProps {
 }
 
 const EventsPage: React.FC<EventsPageProps> = ({ events, setEvents, users, checkIns, setCheckIns }) => {
-    const [selectedEvent, setSelectedEvent] = useState<FullEvent | null>(null);
+    const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [eventToEdit, setEventToEdit] = useState<Event | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    
+    const selectedEvent = selectedEventId ? events.find(e => e.event_id === selectedEventId) || null : null;
 
     const filteredEvents = useMemo(() => {
         return events.filter(event =>
@@ -77,7 +79,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, setEvents, users, check
     };
     
     if (selectedEvent) {
-        return <EventDetail event={selectedEvent} onBack={() => setSelectedEvent(null)} users={users} setCheckIns={setCheckIns} />;
+        return <EventDetail event={selectedEvent} onBack={() => setSelectedEventId(null)} users={users} setCheckIns={setCheckIns} />;
     }
 
     return (
@@ -111,16 +113,24 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, setEvents, users, check
                     <div key={event.event_id} className="bg-surface rounded-xl shadow-md p-6 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all">
                         <div>
                             <p className="text-sm text-secondary font-semibold">{new Date(event.event_date).toDateString()}</p>
-                            <h2 className="text-xl font-bold text-primary mt-1 cursor-pointer" onClick={() => setSelectedEvent(event)}>{event.event_name}</h2>
+                            <h2 className="text-xl font-bold text-primary mt-1 cursor-pointer" onClick={() => setSelectedEventId(event.event_id)}>{event.event_name}</h2>
                             <p className="text-sm text-text-light mt-2">{event.venue}</p>
                         </div>
-                        <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
-                            <div className="text-sm">
-                                <p className="text-text-light">Attendees</p>
-                                <p className="font-bold text-text-main">{event.attendee_count}</p>
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                            <div className="flex justify-between items-center mb-3">
+                                <div className="text-sm">
+                                    <p className="text-text-light">Attendees</p>
+                                    <p className="font-bold text-text-main">{event.attendee_count}</p>
+                                </div>
+                                <button onClick={() => handleEdit(event)} className="p-2 text-gray-400 hover:text-primary transition-colors">
+                                    <EditIcon />
+                                </button>
                             </div>
-                            <button onClick={() => handleEdit(event)} className="p-2 text-gray-400 hover:text-primary transition-colors">
-                                <EditIcon />
+                            <button 
+                                onClick={() => setSelectedEventId(event.event_id)}
+                                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                            >
+                                📋 Mark Attendance
                             </button>
                         </div>
                     </div>
