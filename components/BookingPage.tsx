@@ -42,36 +42,58 @@ const BookingPage: React.FC<BookingPageProps> = ({ events, equipment, users, boo
             alert('Please fill out all fields.');
             return;
         }
+        (async () => {
+            const payload: Omit<Booking, 'booking_id'> = {
+                event_id: parseInt(selectedEventId, 10),
+                equip_id: parseInt(selectedEquipmentId, 10),
+                assigned_to: parseInt(selectedUserId, 10),
+                borrow_date: new Date().toISOString().split('T')[0], // Today's date
+                return_date: null,
+                remarks: remarks,
+            };
 
-        const newBooking: Booking = {
-            booking_id: bookings.length + 1,
-            event_id: parseInt(selectedEventId, 10),
-            equip_id: parseInt(selectedEquipmentId, 10),
-            assigned_to: parseInt(selectedUserId, 10),
-            borrow_date: new Date().toISOString().split('T')[0], // Today's date
-            return_date: null,
-            remarks: remarks,
-        };
+            try {
+                const base = 'http://localhost:8081';
+                const res = await fetch(`${base}/api/bookings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                if (!res.ok) throw new Error('Failed to create booking');
+                const saved: Booking = await res.json();
 
-        setBookings(prevBookings => [...prevBookings, newBooking]);
+                // Update local bookings state
+                setBookings(prevBookings => [...prevBookings, saved]);
 
-        setEquipment(prevEquipment =>
-            prevEquipment.map(item =>
-                item.equip_id === newBooking.equip_id
-                    ? { ...item, status: EquipmentStatus.Borrowed }
-                    : item
-            )
-        );
-        
-        const bookedItemName = equipment.find(item => item.equip_id === newBooking.equip_id)?.equip_name;
-        setSuccessMessage(`Successfully booked "${bookedItemName}"!`);
+                // Update equipment status on backend and locally
+                const equipIdNum = parseInt(selectedEquipmentId, 10);
+                const equipItem = equipment.find(item => item.equip_id === equipIdNum);
+                if (equipItem) {
+                    const updatedEquip = { ...equipItem, status: 'Borrowed' };
+                    const equipRes = await fetch(`${base}/api/equipment/${equipItem.equip_id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updatedEquip),
+                    });
+                    if (!equipRes.ok) throw new Error('Failed to update equipment status');
+                    const savedEquip = await equipRes.json();
+                    setEquipment(prev => prev.map(it => it.equip_id === savedEquip.equip_id ? savedEquip : it));
+                }
 
-        setSelectedEventId('');
-        setSelectedEquipmentId('');
-        setSelectedUserId('');
-        setRemarks('');
+                const bookedItemName = equipment.find(item => item.equip_id === parseInt(selectedEquipmentId, 10))?.equip_name;
+                setSuccessMessage(`Successfully booked "${bookedItemName}"!`);
 
-        setTimeout(() => setSuccessMessage(''), 4000);
+                setSelectedEventId('');
+                setSelectedEquipmentId('');
+                setSelectedUserId('');
+                setRemarks('');
+
+                setTimeout(() => setSuccessMessage(''), 4000);
+            } catch (err) {
+                console.error(err);
+                alert('Booking failed. Check console for details.');
+            }
+        })();
     };
 
     const FormField: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (

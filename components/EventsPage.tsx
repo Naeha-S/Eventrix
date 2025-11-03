@@ -46,12 +46,34 @@ const EventsPage: React.FC<EventsPageProps> = ({ events, setEvents, users, check
     };
 
     const handleSaveEvent = (event: Event) => {
-        if (event.event_id === 0) { // New event
-            const newEvent = { ...event, event_id: Date.now() };
-            setEvents(prev => [...prev, newEvent]);
-        } else { // Existing event
-            setEvents(prev => prev.map(e => e.event_id === event.event_id ? event : e));
-        }
+        (async () => {
+            try {
+                if (event.event_id === 0) { // New event -> POST
+                        const base = 'http://localhost:8081';
+                        const res = await fetch(`${base}/api/events`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(event),
+                    });
+                    if (!res.ok) throw new Error('Failed to create event');
+                    const saved = await res.json();
+                    setEvents(prev => [...prev, saved]);
+                } else { // Existing event -> PUT
+                    const base = 'http://localhost:8081';
+                    const res = await fetch(`${base}/api/events/${event.event_id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(event),
+                    });
+                    if (!res.ok) throw new Error('Failed to update event');
+                    const saved = await res.json();
+                    setEvents(prev => prev.map(e => e.event_id === saved.event_id ? saved : e));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Could not save event. Check console for details.');
+            }
+        })();
     };
     
     if (selectedEvent) {

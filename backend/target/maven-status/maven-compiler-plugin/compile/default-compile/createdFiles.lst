@@ -1,0 +1,17 @@
+com\eventrix\CorsConfig.class
+com\eventrix\repository\BookingRepository.class
+com\eventrix\Application.class
+com\eventrix\controller\BookingController.class
+com\eventrix\repository\EventRepository.class
+com\eventrix\controller\CheckInController.class
+com\eventrix\model\Equipment.class
+com\eventrix\model\Event.class
+com\eventrix\repository\UserRepository.class
+com\eventrix\model\CheckIn.class
+com\eventrix\model\Booking.class
+com\eventrix\repository\CheckInRepository.class
+com\eventrix\controller\EquipmentController.class
+com\eventrix\model\User.class
+com\eventrix\controller\UserController.class
+com\eventrix\controller\EventController.class
+com\eventrix\repository\EquipmentRepository.class

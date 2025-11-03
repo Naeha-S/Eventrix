@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 // FIX: Corrected import paths with './'
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -10,8 +10,7 @@ import BookingPage from './components/BookingPage';
 import LoginPage from './components/LoginPage';
 import StudentsPage from './components/StudentsPage';
 
-// FIX: Corrected import paths with './'
-import { mockUsers, mockEvents, mockEquipment, mockBookings, mockCheckIns } from './data/mockData';
+// Data is now fetched from the Java backend instead of local mockData
 import { User, Event, Equipment, Booking, CheckIn, FullEvent, FullUser, UserRole, FullEquipment } from './types';
 
 type Page = 'dashboard' | 'events' | 'equipment' | 'users' | 'bookings' | 'students';
@@ -20,12 +19,47 @@ const App: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [currentPage, setCurrentPage] = useState<Page>('dashboard');
     
-    // State for our mock data
-    const [users, setUsers] = useState<User[]>(mockUsers);
-    const [events, setEvents] = useState<Event[]>(mockEvents);
-    const [equipment, setEquipment] = useState<Equipment[]>(mockEquipment);
-    const [bookings, setBookings] = useState<Booking[]>(mockBookings);
-    const [checkIns, setCheckIns] = useState<CheckIn[]>(mockCheckIns);
+    // State for data loaded from backend
+    const [users, setUsers] = useState<User[]>([]);
+    const [events, setEvents] = useState<Event[]>([]);
+    const [equipment, setEquipment] = useState<Equipment[]>([]);
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
+
+    useEffect(() => {
+        // Fetch all core resources in parallel and commit to state
+        const fetchAll = async () => {
+            try {
+                        const base = 'http://localhost:8081';
+                        const [usersRes, eventsRes, equipRes, bookingsRes, checkinsRes] = await Promise.all([
+                            fetch(`${base}/api/users`),
+                            fetch(`${base}/api/events`),
+                            fetch(`${base}/api/equipment`),
+                            fetch(`${base}/api/bookings`),
+                            fetch(`${base}/api/checkins`),
+                        ]);
+
+                if (!usersRes.ok || !eventsRes.ok || !equipRes.ok || !bookingsRes.ok || !checkinsRes.ok) {
+                    console.error('One or more API requests failed', usersRes.status, eventsRes.status, equipRes.status, bookingsRes.status, checkinsRes.status);
+                    return;
+                }
+
+                const [usersJson, eventsJson, equipJson, bookingsJson, checkinsJson] = await Promise.all([
+                    usersRes.json(), eventsRes.json(), equipRes.json(), bookingsRes.json(), checkinsRes.json()
+                ]);
+
+                setUsers(usersJson);
+                setEvents(eventsJson);
+                setEquipment(equipJson);
+                setBookings(bookingsJson);
+                setCheckIns(checkinsJson);
+            } catch (err) {
+                console.error('Failed to fetch backend data', err);
+            }
+        };
+
+        fetchAll();
+    }, []);
 
     // Memoized, enriched data for performance
     const fullEvents: FullEvent[] = useMemo(() => {
@@ -104,7 +138,7 @@ const App: React.FC = () => {
             case 'equipment':
                 return <EquipmentPage equipment={fullEquipmentData} bookings={bookings} setEquipment={setEquipment} setBookings={setBookings} />;
             case 'users':
-                return <UsersPage users={fullUsers} />;
+                return <UsersPage users={fullUsers} setUsers={setUsers} />;
             case 'students':
                 return <StudentsPage users={users} events={events} checkIns={checkIns} />;
             case 'bookings':

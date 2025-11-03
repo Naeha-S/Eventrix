@@ -52,13 +52,28 @@ const EventDetail: React.FC<EventDetailProps> = ({ event, onBack, users, setChec
             status: CheckInStatus.Present,
         };
 
-        setCheckIns(prev => [...prev, newCheckIn]);
-        setFeedback({ type: 'success', message: `Successfully marked ${user.name} as present.` });
-        setNameSearch('');
-        setRollNumber('');
-        setShowDropdown(false);
-
-        setTimeout(() => setFeedback(null), 4000);
+        // Persist to backend
+        (async () => {
+            try {
+                const base = 'http://localhost:8081';
+                const res = await fetch(`${base}/api/checkins`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newCheckIn),
+                });
+                if (!res.ok) throw new Error('Failed to create check-in');
+                const saved = await res.json();
+                setCheckIns(prev => [...prev, saved]);
+                setFeedback({ type: 'success', message: `Successfully marked ${user.name} as present.` });
+            } catch (err) {
+                console.error(err);
+                setFeedback({ type: 'error', message: `Failed to mark ${user.name} as present.` });
+            }
+            setNameSearch('');
+            setRollNumber('');
+            setShowDropdown(false);
+            setTimeout(() => setFeedback(null), 4000);
+        })();
     };
 
     const handleAttendanceSubmit = (e: React.FormEvent) => {
