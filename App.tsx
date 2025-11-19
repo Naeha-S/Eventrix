@@ -10,8 +10,9 @@ import BookingPage from './components/BookingPage';
 import LoginPage from './components/LoginPage';
 import StudentsPage from './components/StudentsPage';
 
-// Data is now fetched from the Java backend instead of local mockData
+// Using local mock data directly instead of backend
 import { User, Event, Equipment, Booking, CheckIn, FullEvent, FullUser, UserRole, FullEquipment } from './types';
+import { mockUsers, mockEvents, mockEquipment, mockBookings, mockCheckIns } from './data/mockData';
 
 type Page = 'dashboard' | 'events' | 'equipment' | 'users' | 'bookings' | 'students';
 
@@ -19,46 +20,21 @@ const App: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [currentPage, setCurrentPage] = useState<Page>('dashboard');
     
-    // State for data loaded from backend
-    const [users, setUsers] = useState<User[]>([]);
-    const [events, setEvents] = useState<Event[]>([]);
-    const [equipment, setEquipment] = useState<Equipment[]>([]);
-    const [bookings, setBookings] = useState<Booking[]>([]);
-    const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
+    // State initialized with mock data directly
+    const [users, setUsers] = useState<User[]>(mockUsers);
+    const [events, setEvents] = useState<Event[]>(mockEvents);
+    const [equipment, setEquipment] = useState<Equipment[]>(mockEquipment);
+    const [bookings, setBookings] = useState<Booking[]>(mockBookings);
+    const [checkIns, setCheckIns] = useState<CheckIn[]>(mockCheckIns);
 
+    // No backend fetch needed - using local data
     useEffect(() => {
-        // Fetch all core resources in parallel and commit to state
-        const fetchAll = async () => {
-            try {
-                        const base = 'http://localhost:8081';
-                        const [usersRes, eventsRes, equipRes, bookingsRes, checkinsRes] = await Promise.all([
-                            fetch(`${base}/api/users`),
-                            fetch(`${base}/api/events`),
-                            fetch(`${base}/api/equipment`),
-                            fetch(`${base}/api/bookings`),
-                            fetch(`${base}/api/checkins`),
-                        ]);
-
-                if (!usersRes.ok || !eventsRes.ok || !equipRes.ok || !bookingsRes.ok || !checkinsRes.ok) {
-                    console.error('One or more API requests failed', usersRes.status, eventsRes.status, equipRes.status, bookingsRes.status, checkinsRes.status);
-                    return;
-                }
-
-                const [usersJson, eventsJson, equipJson, bookingsJson, checkinsJson] = await Promise.all([
-                    usersRes.json(), eventsRes.json(), equipRes.json(), bookingsRes.json(), checkinsRes.json()
-                ]);
-
-                setUsers(usersJson);
-                setEvents(eventsJson);
-                setEquipment(equipJson);
-                setBookings(bookingsJson);
-                setCheckIns(checkinsJson);
-            } catch (err) {
-                console.error('Failed to fetch backend data', err);
-            }
-        };
-
-        fetchAll();
+        console.log('Eventrix loaded with mock data:');
+        console.log('Users:', users.length);
+        console.log('Events:', events.length);
+        console.log('Equipment:', equipment.length);
+        console.log('Bookings:', bookings.length);
+        console.log('Check-ins:', checkIns.length);
     }, []);
 
     // Memoized, enriched data for performance

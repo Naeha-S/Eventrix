@@ -1,0 +1,49 @@
+erDiagram
+    USERS {
+      int user_id PK
+      string name
+      string email UK
+      string phone
+      string role
+      string roll_number UK
+    }
+    EVENTS {
+      int event_id PK
+      string event_name
+      datetime event_date
+      string venue
+      text description
+      int organizer_id FK
+    }
+    EQUIPMENT {
+      int equip_id PK
+      string equip_name
+      string category
+      string status
+      string location
+      date purchase_date
+    }
+    BOOKINGS {
+      int booking_id PK
+      int event_id FK
+      int equip_id FK
+      int assigned_to FK
+      date borrow_date
+      date return_date
+      text remarks
+    }
+    CHECKINS {
+      int checkin_id PK
+      int user_id FK
+      int event_id FK
+      datetime checkin_time
+      datetime checkout_time
+      string status
+    }
+
+    USERS ||--o{ EVENTS : organizes
+    USERS ||--o{ BOOKINGS : is_assigned
+    USERS ||--o{ CHECKINS : attends
+    EVENTS ||--o{ BOOKINGS : has
+    EVENTS ||--o{ CHECKINS : logs
+    EQUIPMENT ||--o{ BOOKINGS : is_booked_in
